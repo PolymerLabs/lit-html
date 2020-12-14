@@ -654,7 +654,7 @@ suite('UpdatingElement', () => {
         foo = 5;
         [zug] = 6;
 
-        update(changedProperties: PropertyValues) {
+        protected update(changedProperties: PropertyValues) {
           this.updateCount++;
           super.update(changedProperties);
         }
@@ -1186,7 +1186,7 @@ suite('UpdatingElement', () => {
       wasFirstUpdated = 0;
       changedProperties: PropertyValues | undefined;
 
-      update(changedProperties: PropertyValues) {
+      protected update(changedProperties: PropertyValues) {
         this.wasUpdatedCount++;
         super.update(changedProperties);
       }
@@ -1230,7 +1230,7 @@ suite('UpdatingElement', () => {
         return this.triedToUpdatedCount > 1;
       }
 
-      update(changedProperties: PropertyValues) {
+      protected update(changedProperties: PropertyValues) {
         this.wasUpdatedCount++;
         super.update(changedProperties);
       }
@@ -1309,7 +1309,7 @@ suite('UpdatingElement', () => {
     ]);
   });
 
-  test('setting properties in update does not trigger update', async () => {
+  test('setting properties in `update` does not trigger `update`', async () => {
     class E extends UpdatingElement {
       static get properties() {
         return {foo: {}};
@@ -1343,7 +1343,7 @@ suite('UpdatingElement', () => {
     assert.equal(el.updatedText, '6');
   });
 
-  test('setting properties in update after calling `super.update` *does* trigger update', async () => {
+  test('setting properties in `update` after calling `super.update` *does* trigger `update`', async () => {
     class E extends UpdatingElement {
       static get properties() {
         return {foo: {}};
@@ -1375,7 +1375,7 @@ suite('UpdatingElement', () => {
     assert.equal(el.updatedText, '1');
   });
 
-  test('setting properties in update reflects to attribute and is included in `changedProperties`', async () => {
+  test('setting properties in `update` reflects to attribute and is included in `changedProperties`', async () => {
     class E extends UpdatingElement {
       static get properties() {
         return {foo: {}, bar: {}, zot: {reflect: true}};
@@ -1383,7 +1383,7 @@ suite('UpdatingElement', () => {
 
       changedProperties: PropertyValues | undefined = undefined;
 
-      update(changedProperties: PropertyValues) {
+      protected update(changedProperties: PropertyValues) {
         (this as any).zot = (this as any).foo + (this as any).bar;
         super.update(changedProperties);
         this.changedProperties = changedProperties;
@@ -1441,7 +1441,7 @@ suite('UpdatingElement', () => {
 
       changedProperties: PropertyValues | undefined = undefined;
 
-      update(changedProperties: PropertyValues) {
+      protected update(changedProperties: PropertyValues) {
         (this as any).zot = (this as any).foo + (this as any).bar;
         super.update(changedProperties);
         this.changedProperties = changedProperties;
@@ -1502,7 +1502,7 @@ suite('UpdatingElement', () => {
       get bar() {
         return this._bar as string;
       }
-      update(changedProperties: PropertyValues) {
+      protected update(changedProperties: PropertyValues) {
         this._updateCount++;
         super.update(changedProperties);
       }
@@ -1565,7 +1565,7 @@ suite('UpdatingElement', () => {
       get foo(): number {
         return this._foo as number;
       }
-      update(changedProperties: PropertyValues) {
+      protected update(changedProperties: PropertyValues) {
         this._oldFoo = changedProperties.get('foo');
         super.update(changedProperties);
       }
@@ -1678,7 +1678,7 @@ suite('UpdatingElement', () => {
       get foo(): number {
         return this._foo as number;
       }
-      update(changedProperties: PropertyValues) {
+      protected update(changedProperties: PropertyValues) {
         this._oldFoo = changedProperties.get('foo');
         super.update(changedProperties);
       }
@@ -1903,7 +1903,7 @@ suite('UpdatingElement', () => {
         const setter = defaultDescriptor.set;
         return Object.assign(defaultDescriptor, {
           set(this: E, value: unknown) {
-            setter.call(this, value);
+            setter!.call(this, value);
             if (options.sync && this.hasUpdated && !this.isUpdating) {
               ((this as unknown) as E).performUpdate();
             }
@@ -1923,7 +1923,7 @@ suite('UpdatingElement', () => {
         this.isUpdating = false;
       }
 
-      update(changedProperties: PropertyValues) {
+      protected update(changedProperties: PropertyValues) {
         this.zug = this.foo + 1;
         super.update(changedProperties);
       }
@@ -1990,7 +1990,7 @@ suite('UpdatingElement', () => {
       get bar() {
         return this.getAttribute('bar') || 'defaultBar';
       }
-      update(changedProperties: PropertyValues) {
+      protected update(changedProperties: PropertyValues) {
         this._updateCount++;
         super.update(changedProperties);
       }
@@ -2051,7 +2051,7 @@ suite('UpdatingElement', () => {
         super.attributeChangedCallback(name, old, value);
         this.requestUpdate(name, old);
       }
-      update(changedProperties: PropertyValues) {
+      protected update(changedProperties: PropertyValues) {
         this._updateCount++;
         super.update(changedProperties);
       }
@@ -2089,7 +2089,7 @@ suite('UpdatingElement', () => {
     assert.equal(el._updateCount, 3);
   });
 
-  test('setting properties in `updated` does trigger update and does not block updateComplete', async () => {
+  test('setting properties in `updated` does trigger an update and does not block `updateComplete`', async () => {
     class E extends UpdatingElement {
       static get properties() {
         return {foo: {}};
@@ -2124,7 +2124,7 @@ suite('UpdatingElement', () => {
     assert.isTrue(result);
   });
 
-  test('setting properties in `updated` can await until updateComplete returns true', async () => {
+  test('setting properties in `updated` can await until `updateComplete` returns true', async () => {
     class E extends UpdatingElement {
       static get properties() {
         return {foo: {}};
@@ -2301,7 +2301,7 @@ suite('UpdatingElement', () => {
         await super.performUpdate();
       }
 
-      update(changedProperties: Map<PropertyKey, unknown>) {
+      protected update(changedProperties: Map<PropertyKey, unknown>) {
         this.updateCalled = true;
         super.update(changedProperties);
       }
@@ -2388,10 +2388,10 @@ suite('UpdatingElement', () => {
 
   test('early access of updateComplete waits until first update', async () => {
     class A extends UpdatingElement {
-      didUpdate = false;
+      didCallUpdated = false;
 
       updated(_changedProperties: Map<PropertyKey, unknown>) {
-        this.didUpdate = true;
+        this.didCallUpdated = true;
       }
     }
     customElements.define(generateElementName(), A);
@@ -2399,7 +2399,7 @@ suite('UpdatingElement', () => {
     let updated = false;
     a.updateComplete.then(() => {
       updated = true;
-      assert.isTrue(a.didUpdate);
+      assert.isTrue(a.didCallUpdated);
     });
     await new Promise((r) => setTimeout(r, 20));
     assert.isFalse(updated);
@@ -2482,7 +2482,7 @@ suite('UpdatingElement', () => {
         foo = 5;
         updatedFoo = 0;
 
-        update(changedProperties: Map<PropertyKey, unknown>) {
+        protected update(changedProperties: Map<PropertyKey, unknown>) {
           if (shouldThrow) {
             throw new Error('test error');
           }
@@ -2522,7 +2522,7 @@ suite('UpdatingElement', () => {
         firstUpdatedCalled = false;
         updatedCalled = false;
 
-        update(changedProperties: Map<PropertyKey, unknown>) {
+        protected update(changedProperties: Map<PropertyKey, unknown>) {
           if (shouldThrow) {
             throw new Error('test error');
           }

@@ -90,7 +90,7 @@ export class LitElement extends UpdatingElement {
    * Note this property name is a string to prevent breaking Closure JS Compiler
    * optimizations. See updating-element for more information.
    */
-  protected static ['finalized'] = true;
+  static ['finalized'] = true;
 
   readonly _$renderOptions: RenderOptions = {host: this};
 
