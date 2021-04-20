@@ -54,8 +54,7 @@
     "mocha": "^7.1.1",
     "tap-spec": "^5.0.0",
     "tape": "^4.11.0",
-    "tape-promise": "^4.0.0",
-    "typescript": "^4.1.3"
+    "tape-promise": "^4.0.0"
   },
   "dependencies": {
     "@lit-labs/ssr-client": "^1.0.0-rc.1",
