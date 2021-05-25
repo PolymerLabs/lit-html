@@ -7,6 +7,7 @@
 import {
   ComplexAttributeConverter,
   defaultConverter,
+  notEqual,
   PropertyDeclaration,
   PropertyDeclarations,
   PropertyValues,
@@ -238,6 +239,30 @@ suite('ReactiveElement', () => {
     await el.updateComplete;
     assert.equal(el.all, 15);
     assert.equal(el.updateCount, 6);
+  });
+
+  test('property option `reactive`', async () => {
+    class E extends ReactiveElement {
+      static get properties() {
+        return {
+          method: {reactive: false},
+        };
+      }
+
+      called = 0;
+      method() {
+        this.called++;
+      }
+    }
+    customElements.define(generateElementName(), E);
+    const el = new E();
+    container.appendChild(el);
+    await el.updateComplete;
+    el.method();
+    assert.equal(el.called, 1);
+    el.setAttribute('method', 'test');
+    await el.updateComplete;
+    assert.notEqual((el as any).method, 'test');
   });
 
   test('property option `converter` can use `type` info', async () => {
@@ -846,6 +871,51 @@ suite('ReactiveElement', () => {
     assert.equal(el.updateCount, 6);
   });
 
+  test('property options merge when subclassing', async () => {
+    class E extends ReactiveElement {
+      static get properties(): PropertyDeclarations {
+        return {
+          customAttr: {attribute: 'custom'},
+        };
+      }
+      customAttr?: boolean;
+    }
+    customElements.define(generateElementName(), E);
+
+    class F extends E {
+      static get properties(): PropertyDeclarations {
+        return {
+          customAttr: {reflect: true},
+        };
+      }
+    }
+
+    class G extends F {
+      static get properties(): PropertyDeclarations {
+        return {
+          customAttr: {type: Boolean},
+        };
+      }
+
+      constructor() {
+        super();
+        this.customAttr = true;
+      }
+    }
+
+    customElements.define(generateElementName(), G);
+
+    const el = new G();
+    container.appendChild(el);
+    await el.updateComplete;
+    assert.equal(el.customAttr, true);
+    assert.equal(el.getAttribute('custom'), '');
+    el.customAttr = false;
+    await el.updateComplete;
+    assert.equal(el.customAttr, false);
+    assert.equal(el.getAttribute('custom'), null);
+  });
+
   test('superclass properties not affected by subclass', async () => {
     class E extends ReactiveElement {
       static get properties(): PropertyDeclarations {
@@ -1148,7 +1218,7 @@ suite('ReactiveElement', () => {
       __bar?: string;
 
       static get properties(): PropertyDeclarations {
-        return {bar: {}, foo: {reflect: true}};
+        return {bar: {hasChanged: notEqual}, foo: {reflect: true}};
       }
 
       get bar() {
@@ -1171,7 +1241,10 @@ suite('ReactiveElement', () => {
 
     class G extends F {
       static get properties(): PropertyDeclarations {
-        return {bar: {hasChanged, reflect: true}, foo: {hasChanged}};
+        return {
+          bar: {hasChanged, reflect: true},
+          foo: {hasChanged, reflect: false},
+        };
       }
     }
 
@@ -2471,6 +2544,32 @@ suite('ReactiveElement', () => {
     assert.equal(a.prop2, 'prop2');
     a.dispatchEvent(new Event('click'));
     assert.equal(a.event, 'click');
+  });
+
+  test('addInitializer composes with subclass', () => {
+    class A extends ReactiveElement {
+      prop1?: string;
+    }
+    A.addInitializer((a) => {
+      (a as A).prop1 = 'prop1';
+    });
+    customElements.define(generateElementName(), A);
+    class B extends A {
+      prop2?: string;
+    }
+    B.addInitializer((a) => {
+      (a as B).prop2 = 'prop2';
+    });
+    customElements.define(generateElementName(), B);
+
+    const a = new A();
+    container.appendChild(a);
+    assert.equal(a.prop1, 'prop1');
+    assert.notEqual((a as any).prop2, 'prop2');
+    const b = new B();
+    container.appendChild(b);
+    assert.equal(b.prop1, 'prop1');
+    assert.equal(b.prop2, 'prop2');
   });
 
   suite('exceptions', () => {

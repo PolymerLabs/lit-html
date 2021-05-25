@@ -17,6 +17,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- ### Removed -->
 <!-- ### Fixed -->
 
+## Unreleased
+
+### Added
+
+- (Since 1.0.0-rc.2) Added ability to specify decorators in `static properties`
+  by adding a `decorators` array with decorator function calls. Use
+  `reactive: false` if the property should not be reactive, for example to
+  decorate a method [#1884](https://github.com/lit/lit/pull/1884).
+
+### Changed
+
+- (Since 1.0.0-rc.2) [Breaking] Property options now merge between superclasses
+  and subclasses for individual properties [#1884](https://github.com/lit/lit/pull/1884)..
+
 ## 1.0.0-rc.2 - 2021-05-07
 
 ### Changed

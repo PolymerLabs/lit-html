@@ -173,7 +173,56 @@ export interface PropertyDeclaration<Type = unknown, TypeHint = unknown> {
    * the property changes.
    */
   readonly noAccessor?: boolean;
+
+  /**
+   * Indicates whether the property will become reactive. Defaults to `true`
+   * but if set to `false`, then only `decorators` will be applied. This is
+   * equivalent to `attribute: false` and `noAccessor: true`.
+   */
+  readonly reactive?: boolean;
+
+  /**
+   * An optional array of decorator functions to apply to the property.
+   * Typically decorators are applied via the `@decoratorName()` syntax above
+   * the class property but this requires using a tool like TypeScript or Babel.
+   * Decorators can be used without tooling by using this property option.
+   * Note, for properties that need a decorator like `@listen`, `@eventOptions`,
+   * or `@query` that are not otherwise reactive, set `reactive` to `false`.
+   */
+  decorators?: CompatiblePropertyDecorator[];
 }
+
+export type Constructor<T> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  new (...args: any[]): T;
+};
+
+// From the TC39 Decorators proposal
+export interface ClassDescriptor {
+  kind: 'class';
+  elements: ClassElement[];
+  finisher?: <T>(clazz: Constructor<T>) => void | Constructor<T>;
+}
+
+// From the TC39 Decorators proposal
+export interface ClassElement {
+  kind: 'field' | 'method';
+  key: PropertyKey;
+  placement: 'static' | 'prototype' | 'own';
+  initializer?: Function;
+  extras?: ClassElement[];
+  finisher?: <T>(clazz: Constructor<T>) => void | Constructor<T>;
+  descriptor?: PropertyDescriptor;
+}
+
+export type CompatiblePropertyDecorator = (
+  protoOrDescriptor:
+    | ReactiveElement
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | ClassElement,
+  name?: string | number | symbol | undefined
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+) => any;
 
 /**
  * Map of properties to PropertyDeclaration options. For each property an
@@ -254,6 +303,7 @@ export const notEqual: HasChanged = (value: unknown, old: unknown): boolean => {
 
 const defaultPropertyDeclaration: PropertyDeclaration = {
   attribute: true,
+  reactive: true,
   type: String,
   converter: defaultConverter,
   reflect: false,
@@ -338,8 +388,10 @@ export abstract class ReactiveElement
    * @nocollapse
    */
   static addInitializer(initializer: Initializer) {
-    this._initializers ??= [];
-    this._initializers.push(initializer);
+    if (!this.hasOwnProperty('_initializers')) {
+      this._initializers = [...(this._initializers ?? [])];
+    }
+    this._initializers!.push(initializer);
   }
 
   static _initializers?: Initializer[];
@@ -463,7 +515,7 @@ export abstract class ReactiveElement
     options: PropertyDeclaration = defaultPropertyDeclaration
   ) {
     // if this is a state property, force the attribute to false.
-    if (options.state) {
+    if (options.state || options.reactive === false) {
       // Cast as any since this is readonly.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (options as any).attribute = false;
@@ -471,19 +523,32 @@ export abstract class ReactiveElement
     // Note, since this can be called by the `@property` decorator which
     // is called before `finalize`, we ensure finalization has been kicked off.
     this.finalize();
-    this.elementProperties.set(name, options);
+    // Allow multiple calls to `createProperty` to merge compose options.
+    let propertyOptions = this.elementProperties.get(name);
+    if (propertyOptions !== undefined) {
+      Object.assign(propertyOptions, options);
+    } else {
+      this.elementProperties.set(name, (propertyOptions = options));
+    }
     // Do not generate an accessor if the prototype already has one, since
     // it would be lost otherwise and that would never be the user's intention;
     // Instead, we expect users to call `requestUpdate` themselves from
     // user-defined accessors. Note that if the super has an accessor we will
     // still overwrite it
-    if (!options.noAccessor && !this.prototype.hasOwnProperty(name)) {
+    const skipAccessor =
+      options.noAccessor ||
+      options.reactive === false ||
+      this.prototype.hasOwnProperty(name);
+    if (!skipAccessor) {
       const key = typeof name === 'symbol' ? Symbol() : `__${name}`;
-      const descriptor = this.getPropertyDescriptor(name, key, options);
+      const descriptor = this.getPropertyDescriptor(name, key, propertyOptions);
       if (descriptor !== undefined) {
         Object.defineProperty(this.prototype, name, descriptor);
       }
     }
+    options.decorators?.forEach((decorator) => {
+      decorator(this.prototype, name);
+    });
   }
 
   /**
@@ -568,7 +633,15 @@ export abstract class ReactiveElement
     // finalize any superclasses
     const superCtor = Object.getPrototypeOf(this) as typeof ReactiveElement;
     superCtor.finalize();
-    this.elementProperties = new Map(superCtor.elementProperties);
+    // When subclassing, copy options so multiple calls to `createProperty` can
+    // merge them safely.
+    const properties = new Map(superCtor.elementProperties);
+    if (superCtor.elementProperties !== undefined) {
+      for (const [key, value] of properties) {
+        properties.set(key, {...value});
+      }
+    }
+    this.elementProperties = properties;
     // initialize Map populated in observedAttributes
     this.__attributeToPropertyMap = new Map();
     // make any properties
