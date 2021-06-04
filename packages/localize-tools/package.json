@@ -19,7 +19,7 @@
   "main": "lit-localize.js",
   "type": "module",
   "scripts": {
-    "clean": "git clean -dXn | sed 's/^Would remove //' | grep -v node_modules | xargs rm -rf",
+    "clean": "rimraf lib/",
     "build": "npm run clean && npm run generate-json-schema && tsc",
     "generate-json-schema": "typescript-json-schema tsconfig.schema.json ConfigFile --include=src/types/config.d.ts --required --noExtraProps > config.schema.json",
     "test": "npm run build && npm run test:unit && npm run test:check-tsc",

@@ -11,7 +11,7 @@
     "build": "npm run clean && npm run build:ts",
     "build:ts": "tsc",
     "build:ts:watch": "tsc --watch",
-    "clean": "rm -rf index.js demo/ test/ lib/ *.tsbuildinfo",
+    "clean": "rimraf index.js demo/ test/ lib/ *.tsbuildinfo",
     "demo:vm-modules": "node --experimental-vm-modules ./demo/vm-modules/server.js",
     "demo:global": "node ./demo/global/server.js",
     "test": "npm run test:unit && npm run test:integration",
@@ -68,7 +68,8 @@
     "lit-html": "^2.0.0-rc.1",
     "node-fetch": "^2.6.0",
     "parse5": "^5.1.0",
-    "resolve": "^1.10.1"
+    "resolve": "^1.10.1",
+    "rimraf": "^3.0.2"
   },
   "engines": {
     "node": ">=13.9.0"
