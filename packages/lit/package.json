@@ -55,9 +55,9 @@
   },
   "scripts": {
     "build": "npm run clean && npm run build:ts && rollup -c",
-    "build:watch": "rollup -c --watch",
     "build:ts": "tsc --build && treemirror development . '**/*.d.ts{,.map}'",
     "build:ts:watch": "tsc --build --watch",
+    "build:watch": "rollup -c --watch",
     "clean": "rm -rf {async-directive,decorators,directive-helpers,directive,html,experimental-hydrate-support,experimental-hydrate,index,polyfill-support,static-html}.{d.ts.map,d.ts,js.map,js} test/ decorators/ directives/ development/ *.tsbuildinfo",
     "publish-dev": "VERSION=${npm_package_version%-*}-dev.`git rev-parse --short HEAD` && npm version --no-git-tag-version $VERSION && npm publish --tag dev",
     "regen-package-lock": "rm -rf node_modules package-lock.json; npm install",
@@ -66,19 +66,19 @@
   "files": [
     "/async-directive.{d.ts.map,d.ts,js.map,js}",
     "/decorators.{d.ts.map,d.ts,js.map,js}",
+    "/decorators/",
     "/directive-helpers.{d.ts.map,d.ts,js.map,js}",
     "/directive.{d.ts.map,d.ts,js.map,js}",
-    "/html.{d.ts.map,d.ts,js.map,js}",
+    "/directives/",
     "/experimental-hydrate-support.{d.ts.map,d.ts,js.map,js}",
     "/experimental-hydrate.{d.ts.map,d.ts,js.map,js}",
+    "/html.{d.ts.map,d.ts,js.map,js}",
     "/index.{d.ts.map,d.ts,js.map,js}",
     "/polyfill-support.{d.ts.map,d.ts,js.map,js}",
-    "/static-html.{d.ts.map,d.ts,js.map,js}",
-    "/decorators/",
-    "/directives/",
     "/src/",
     "!/src/demo/",
-    "!/src/test/"
+    "!/src/test/",
+    "/static-html.{d.ts.map,d.ts,js.map,js}"
   ],
   "dependencies": {
     "@lit/reactive-element": "^1.0.0-rc.2",

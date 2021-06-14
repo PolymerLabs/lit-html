@@ -6,32 +6,32 @@
   },
   "description": "Localization client library for lit-html",
   "license": "BSD-3-Clause",
-  "author": "Google LLC",
-  "homepage": "https://github.com/Lit/Lit/tree/main/packages/localize",
   "repository": {
     "type": "git",
     "url": "https://github.com/Lit/Lit.git",
     "directory": "packages/localize"
   },
+  "author": "Google LLC",
+  "homepage": "https://github.com/Lit/Lit/tree/main/packages/localize",
   "main": "lit-localize.js",
   "type": "module",
   "scripts": {
-    "clean": "git clean -dXn | sed 's/^Would remove //' | grep -v node_modules | xargs rm -rf",
     "build": "npm run clean && tsc",
-    "test": "web-test-runner",
-    "prepack": "npm run build"
+    "clean": "git clean -dXn | sed 's/^Would remove //' | grep -v node_modules | xargs rm -rf",
+    "prepack": "npm run build",
+    "test": "web-test-runner"
   },
   "files": [
-    "/src/",
-    "!/src/tests/",
-    "/src_client/",
-    "!/src_client/tests/",
+    "/config.schema.json",
+    "/init/",
+    "/internal/",
     "/lit-localize.d.ts",
     "/lit-localize.js",
     "/lit-localize.js.map",
-    "/internal/",
-    "/init/",
-    "/config.schema.json"
+    "/src_client/",
+    "!/src_client/tests/",
+    "/src/",
+    "!/src/tests/"
   ],
   "dependencies": {
     "@lit/reactive-element": "^1.0.0-rc.1",

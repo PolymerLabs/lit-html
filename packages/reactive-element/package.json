@@ -44,10 +44,10 @@
   },
   "scripts": {
     "build": "npm run clean && npm run build:ts && rollup -c && npm run build:babel",
-    "build:watch": "rollup -c --watch",
+    "build:babel": "babel --extensions '.ts' src/test/decorators  --out-dir development/test/decorators-babel",
     "build:ts": "tsc --build && treemirror development . '**/*.d.ts{,.map}'",
     "build:ts:watch": "tsc --build --watch",
-    "build:babel": "babel --extensions '.ts' src/test/decorators  --out-dir development/test/decorators-babel",
+    "build:watch": "rollup -c --watch",
     "check-version": "node scripts/check-version-tracker.js",
     "checksize": "rollup -c --environment=CHECKSIZE",
     "clean": "rm -rf {css-tag,decorators,polyfill-support,reactive-controller,reactive-element}.{js,js.map,d.ts} test/ decorators/ development/ *.tsbuildinfo",
@@ -64,11 +64,11 @@
   "files": [
     "/css-tag.{d.ts,d.ts.map,js,js.map}",
     "/decorators.{d.ts,d.ts.map,js,js.map}",
+    "/decorators/",
+    "/development/",
     "/polyfill-support.{d.ts,d.ts.map,js,js.map}",
     "/reactive-controller.{d.ts,d.ts.map,js,js.map}",
     "/reactive-element.{d.ts,d.ts.map,js,js.map}",
-    "/decorators/",
-    "/development/",
     "/src/",
     "!/src/demo/",
     "!/src/test/"

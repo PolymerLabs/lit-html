@@ -52,10 +52,10 @@
   },
   "scripts": {
     "build": "npm run clean && npm run build:ts && npm run build:version-stability-test && rollup -c",
-    "build:watch": "rollup -c --watch",
     "build:ts": "tsc --build && treemirror development . '**/*.d.ts{,.map}'",
     "build:ts:watch": "tsc --build --watch",
     "build:version-stability-test": "rollup -c rollup-version-stability-test.config.js",
+    "build:watch": "rollup -c --watch",
     "check-version": "node scripts/check-version-tracker.js",
     "checksize": "rollup -c --environment=CHECKSIZE",
     "clean": "rm -rf {async-directive,directive-helpers,directive,experimental-hydrate,lit-html,polyfill-support,private-ssr-support,static}.{js,js.map,d.ts} test/ directives/ development/ version-stability-test/ *.tsbuildinfo",
@@ -68,18 +68,18 @@
   },
   "files": [
     "/async-directive.{d.ts,d.ts.map,js,js.map}",
+    "/development/",
+    "!/development/test/",
     "/directive-helpers.{d.ts,d.ts.map,js,js.map}",
     "/directive.{d.ts,d.ts.map,js,js.map}",
+    "/directives/",
     "/experimental-hydrate.{d.ts,d.ts.map,js,js.map}",
     "/lit-html.{d.ts,d.ts.map,js,js.map}",
     "/polyfill-support.{d.ts,d.ts.map,js,js.map}",
     "/private-ssr-support.{d.ts,d.ts.map,js,js.map}",
-    "/static.{d.ts,d.ts.map,js,js.map}",
-    "/development/",
-    "!/development/test/",
-    "/directives/",
     "/src/",
-    "!/src/test/"
+    "!/src/test/",
+    "/static.{d.ts,d.ts.map,js,js.map}"
   ],
   "dependencies": {
     "@types/trusted-types": "^1.0.1"
