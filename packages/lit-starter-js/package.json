@@ -1,29 +1,31 @@
 {
   "name": "@lit/lit-starter-js",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "description": "A simple web component",
+  "license": "BSD-3-Clause",
+  "author": "Google LLC",
   "main": "my-element.js",
   "module": "my-element.js",
   "type": "module",
   "scripts": {
+    "analyze": "wca analyze \"**/*.js\" --outFile custom-elements.json",
     "build": "echo \"This is not a TypeScript project, so no need to build.\"",
-    "lint": "npm run lint:lit-analyzer && npm run lint:eslint",
-    "lint:eslint": "eslint '**/*.js'",
-    "lint:lit-analyzer": "lit-analyzer my-element.js",
-    "format": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --ignore-path ./.eslintignore --write",
+    "checksize": "rollup -c ; cat my-element.bundled.js | gzip -9 | wc -c ; rm my-element.bundled.js",
     "docs": "npm run docs:clean && npm run analyze && npm run docs:build && npm run docs:assets && npm run docs:gen",
+    "docs:assets": "cp node_modules/prismjs/themes/prism-okaidia.css docs/",
+    "docs:build": "rollup -c --file docs/my-element.bundled.js",
     "docs:clean": "rimraf docs",
     "docs:gen": "eleventy --config=.eleventy.cjs",
     "docs:gen:watch": "eleventy --config=.eleventy.cjs --watch",
-    "docs:build": "rollup -c --file docs/my-element.bundled.js",
-    "docs:assets": "cp node_modules/prismjs/themes/prism-okaidia.css docs/",
     "docs:serve": "wds --root-dir=docs --node-resolve --watch",
-    "analyze": "wca analyze \"**/*.js\" --outFile custom-elements.json",
+    "format": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --ignore-path ./.eslintignore --write",
+    "lint": "npm run lint:lit-analyzer && npm run lint:eslint",
+    "lint:eslint": "eslint '**/*.js'",
+    "lint:lit-analyzer": "lit-analyzer my-element.js",
     "serve": "wds --watch",
     "test": "wtr",
-    "test:watch": "npm run test -- --watch",
-    "checksize": "rollup -c ; cat my-element.bundled.js | gzip -9 | wc -c ; rm my-element.bundled.js"
+    "test:watch": "npm run test -- --watch"
   },
   "keywords": [
     "web-components",
@@ -31,8 +33,6 @@
     "javascript",
     "lit"
   ],
-  "author": "Google LLC",
-  "license": "BSD-3-Clause",
   "dependencies": {
     "lit": "^2.0.0-rc.1",
     "lit-element": "^3.0.0-rc.1"
